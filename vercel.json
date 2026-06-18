@@ -1,9 +1,11 @@
 {
   "version": 2,
   "builds": [
+    { "src": "api/redirect.js", "use": "@vercel/node" },
     { "src": "api/index.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { "src": "/r/(.*)", "dest": "api/redirect.js" },
     { "src": "/(.*)", "dest": "api/index.js" }
   ]
 }
