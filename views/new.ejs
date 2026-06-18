@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新建活码</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>📱 新建活码</h1>
+      <a href="/" class="back-link">← 返回后台</a>
+    </div>
+  </header>
+  <main>
+    <div class="form-card">
+      <form action="/new" method="POST">
+        <div class="form-group">
+          <label for="name">活码名称</label>
+          <input type="text" id="name" name="name" placeholder="例如：门店A推广海报" required>
+          <p class="form-hint">用于在管理后台识别该活码</p>
+        </div>
+        <div class="form-group">
+          <label for="targetUrl">跳转链接</label>
+          <input type="url" id="targetUrl" name="targetUrl" placeholder="https://example.com/page" required>
+          <p class="form-hint">用户扫描后跳转到的目标网址</p>
+        </div>
+        <div class="form-group">
+          <label for="host">二维码域名/地址（可选）</label>
+          <input type="text" id="host" name="host" placeholder="http://<%= locals.lanIp %>:<%= locals.port %>" value="http://<%= locals.lanIp %>:<%= locals.port %>">
+          <p class="form-hint">
+            二维码中实际包含的地址，默认使用局域网 IP <code><%= locals.lanIp %>:<%= locals.port %></code>。
+            如需公网使用，请改为你的公网 IP 或域名，例如 <code>http://your-domain.com</code>
+          </p>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-lg">创建活码</button>
+          <a href="/" class="btn btn-secondary btn-lg">取消</a>
+        </div>
+      </form>
+    </div>
+    <div class="tip-card">
+      <strong>💡 工作流程：</strong>
+      <ol>
+        <li>创建活码 → 填写名称、跳转链接、二维码地址（局域网/公网）</li>
+        <li>获取二维码 → 把生成的二维码图片打印/贴在物料上</li>
+        <li>随时更换 → 在后台修改跳转链接，二维码无需变更</li>
+      </ol>
+    </div>
+  </main>
+</body>
+</html>

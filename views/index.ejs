@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活码管理后台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>📱 活码管理后台</h1>
+      <p class="subtitle">二维码固定不变，跳转目标随时更换</p>
+    </div>
+  </header>
+  <main>
+    <div class="actions-bar">
+      <a href="/new" class="btn btn-primary">＋ 新建活码</a>
+      <span class="count-info">共 <%= codes.length %> 个活码</span>
+    </div>
+
+    <!-- Network info banner -->
+    <div class="alert alert-info" style="margin-bottom:24px;">
+      <strong>🌐 局域网地址：</strong><code><%= locals.lanIp %>:<%= locals.port %></code>
+      — 同一 Wi-Fi 下的手机扫码可正常访问
+      <% if (process.env.PUBLIC_URL) { %>
+        · 公网地址：<code><%= locals.publicUrl %></code>
+      <% } %>
+    </div>
+
+    <% if (codes.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">📌</div>
+        <h2>还没有活码</h2>
+        <p>点击上方按钮创建你的第一个活码</p>
+      </div>
+    <% } else { %>
+      <div class="code-grid">
+        <% codes.forEach(code => { %>
+          <div class="code-card">
+            <div class="card-header">
+              <h3><%= code.name %></h3>
+              <span class="badge"><%= code.scanCount || 0 %> 次扫描</span>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="label">活码 ID</span>
+                <code><%= code.id %></code>
+              </div>
+              <div class="info-row">
+                <span class="label">跳转目标</span>
+                <a href="<%= code.targetUrl %>" target="_blank" class="target-url"><%= code.targetUrl %></a>
+              </div>
+              <div class="info-row">
+                <span class="label">二维码地址</span>
+                <code class="qr-url">http://<%= locals.lanIp %>:<%= locals.port %>/r/<%= code.id %></code>
+              </div>
+              <div class="info-row muted">
+                <span class="label">更新于</span>
+                <span><%= new Date(code.updatedAt).toLocaleString('zh-CN') %></span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a href="/qr/<%= code.id %>" class="btn btn-sm btn-accent">查看二维码</a>
+              <a href="/edit/<%= code.id %>" class="btn btn-sm btn-secondary">编辑</a>
+              <form action="/delete/<%= code.id %>" method="POST" class="inline-form" onsubmit="return confirm('确定要删除「<%= code.name %>」吗？')">
+                <button type="submit" class="btn btn-sm btn-danger">删除</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+</body>
+</html>

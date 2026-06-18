@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活码二维码 - <%= code.name %></title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>📱 二维码</h1>
+      <a href="/" class="back-link">← 返回后台</a>
+    </div>
+  </header>
+  <main>
+    <!-- Alert if QR URL uses localhost -->
+    <% if (redirectUrl.includes('localhost')) { %>
+      <div class="alert alert-warning">
+        <strong>⚠️ 当前二维码使用 localhost</strong>，手机扫码无法访问！请使用下方的「自定义域名/地址」功能重新生成。
+      </div>
+    <% } else { %>
+      <div class="alert alert-success">
+        <strong>✅ 二维码已配置为公网地址</strong>，任何人在任何地方扫码都可以直接访问并跳转到你设定的链接。
+        <br>如需部署到公网，请在下方输入域名重新生成。
+      </div>
+    <% } %>
+
+    <div class="qr-display-card">
+      <div class="qr-preview">
+        <% if (qrDataUrl) { %>
+          <img src="<%= qrDataUrl %>" alt="活码二维码" id="qrImage" class="qr-image">
+        <% } else { %>
+          <div class="qr-error">二维码生成失败</div>
+        <% } %>
+      </div>
+      <div class="qr-info">
+        <h2><%= code.name %></h2>
+        <div class="qr-detail-row">
+          <span class="label">当前跳转</span>
+          <a href="<%= code.targetUrl %>" target="_blank"><%= code.targetUrl %></a>
+        </div>
+        <div class="qr-detail-row">
+          <span class="label">二维码内容（扫码访问的地址）</span>
+          <code class="qr-url" id="qrUrl"><%= redirectUrl %></code>
+        </div>
+        <div class="qr-detail-row">
+          <span class="label">局域网地址</span>
+          <code><%= locals.lanIp %>:<%= locals.port %></code>
+          <span class="hint">同一 Wi-Fi 下可用</span>
+        </div>
+        <div class="qr-detail-row muted">
+          <span class="label">扫描次数</span>
+          <span><%= code.scanCount || 0 %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom host form -->
+    <div class="form-card" style="margin-top:24px;">
+      <h3 style="margin-bottom:16px;font-size:16px;">自定义二维码域名/地址</h3>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:12px;">
+        如果要在公网使用，请输入你的服务器公网 IP 或域名，系统将重新生成二维码。<br>
+        例如：<code>http://your-domain.com</code> 或 <code>http://192.168.1.100:4567</code>
+      </p>
+      <form id="hostForm" method="GET" action="/qr/<%= code.id %>">
+        <div class="form-group" style="display:flex;gap:8px;align-items:flex-start;">
+          <input type="text" id="hostInput" name="host" placeholder="http://你的公网IP或域名:端口"
+            value="<%= queryHost %>" style="flex:1;">
+          <button type="submit" class="btn btn-primary">重新生成</button>
+        </div>
+      </form>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-secondary" onclick="setHost('http://<%= locals.lanIp %>:<%= locals.port %>')">使用局域网地址</button>
+        <% if (locals.publicUrl && !locals.publicUrl.includes('localhost') && locals.publicUrl !== `http://${locals.lanIp}:${locals.port}`) { %>
+          <button class="btn btn-sm btn-secondary" onclick="setHost('<%= locals.publicUrl %>')">使用 PUBLIC_URL</button>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="actions-bar" style="justify-content:center;gap:16px;margin-top:24px;">
+      <button class="btn btn-primary btn-lg" onclick="downloadQR()">⬇ 下载二维码 PNG</button>
+      <a href="/edit/<%= code.id %>" class="btn btn-secondary btn-lg">✏️ 编辑跳转链接</a>
+    </div>
+
+    <div class="tip-card" style="margin-top:32px;">
+      <strong>📌 使用说明：</strong>
+      <ol>
+        <li>先确定二维码中的地址手机可以访问（同一 Wi-Fi 用局域网地址、公网用域名）</li>
+        <li>在「自定义域名/地址」中输入正确的地址 → 点击「重新生成」</li>
+        <li>右键点击二维码图片 → 「另存为」保存（或点击下载按钮）</li>
+        <li>将保存的二维码图片印刷到海报、传单、贴纸等物料上</li>
+        <li>任何时候都可以在后台修改跳转链接，二维码<strong>不需重新印刷</strong></li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    function downloadQR() {
+      const img = document.getElementById('qrImage');
+      if (!img) return;
+      const link = document.createElement('a');
+      link.download = '活码-<%= code.name %>-<%= code.id %>.png';
+      link.href = img.src;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    function setHost(url) {
+      document.getElementById('hostInput').value = url;
+      document.getElementById('hostForm').submit();
+    }
+  </script>
+</body>
+</html>
